@@ -63,14 +63,15 @@ class AchFile(object):
         batch_header = BatchHeader(
             serv_cls_code=serv_cls_code,
             batch_id=batch_count,
+            cmpy_dis_data=self.settings.get('cmpy_dis_data', ''),
             company_id=company_id or self.settings['company_id'],
             std_ent_cls_code=std_ent_cls_code,
             entry_desc=entry_desc,
             desc_date='',
             eff_ent_date=eff_ent_date.strftime('%y%m%d'),  # YYMMDD
             orig_stat_code='1',
-            orig_dfi_id=self.settings['immediate_dest'][:8],
-            company_name=self.settings['immediate_org_name']
+            orig_dfi_id=self.settings['immediate_org'][:8],
+            company_name=self.settings['company_name']
         )
 
         entries = list()
@@ -91,7 +92,7 @@ class AchFile(object):
             entry.dfi_acnt_num = record['account_number']
             entry.amount = int(round(float(record['amount']) * 100))
             entry.ind_name = record['name'].upper()[:22]
-            entry.trace_num = self.settings['immediate_dest'][:8] \
+            entry.trace_num = self.settings['immediate_org'][:8] \
                 + entry.validate_numeric_field(entry_counter, 7)
 
             entries.append((entry, record.get('addenda', [])))
@@ -186,7 +187,7 @@ class AchFile(object):
         if std_ent_cls_code == 'PPD':
             entry_desc = 'PAYROLL'
         elif std_ent_cls_code == 'CCD':
-            entry_desc = 'DUES'
+            entry_desc = 'LOAN'
         else:
             entry_desc = 'OTHER'
 
